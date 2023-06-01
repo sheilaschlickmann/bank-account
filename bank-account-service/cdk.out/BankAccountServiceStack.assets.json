@@ -1,0 +1,34 @@
+{
+  "version": "32.0.0",
+  "files": {
+    "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc": {
+      "source": {
+        "path": "asset.d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "132949636437-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-132949636437-us-east-1",
+          "objectKey": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::132949636437:role/cdk-hnb659fds-file-publishing-role-132949636437-us-east-1"
+        }
+      }
+    },
+    "ee98a7f508b67fc005985dc704d995f34f2be514ae5c2a4dcd718f4d31e8b547": {
+      "source": {
+        "path": "BankAccountServiceStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "132949636437-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-132949636437-us-east-1",
+          "objectKey": "ee98a7f508b67fc005985dc704d995f34f2be514ae5c2a4dcd718f4d31e8b547.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::132949636437:role/cdk-hnb659fds-file-publishing-role-132949636437-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
