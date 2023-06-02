@@ -114,7 +114,7 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::SQS::Queue",
                   "aws:cdk:cloudformation:props": {
-                    "visibilityTimeout": 300
+                    "visibilityTimeout": 100
                   }
                 },
                 "constructInfo": {
@@ -299,7 +299,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-                      "s3Key": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip"
+                      "s3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [
@@ -495,7 +495,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-                      "s3Key": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip"
+                      "s3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [
@@ -703,7 +703,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-                      "s3Key": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip"
+                      "s3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [

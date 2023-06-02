@@ -1,9 +1,10 @@
 const { Stack, RemovalPolicy, Duration } = require('aws-cdk-lib');
-const {Table, AttributeType} = require("aws-cdk-lib/aws-dynamodb");
+const {Table, AttributeType, StreamViewType } = require("aws-cdk-lib/aws-dynamodb");
 const {Queue} = require("aws-cdk-lib/aws-sqs");
 const { Function, Runtime, Code } = require('aws-cdk-lib/aws-lambda');
-const { SqsEventSource} = require("aws-cdk-lib/aws-lambda-event-sources");
+const { SqsEventSource, DynamoEventSource} = require("aws-cdk-lib/aws-lambda-event-sources");
 const { RestApi, LambdaIntegration  } = require('aws-cdk-lib/aws-apigateway');
+
 
 class BankAccountServiceStack extends Stack {
 
@@ -11,6 +12,7 @@ class BankAccountServiceStack extends Stack {
     super(scope, id, props);
         
     const transactionDB = new Table(this, 'TransactionsTable', {
+      stream: StreamViewType.NEW_IMAGE,
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
@@ -20,6 +22,7 @@ class BankAccountServiceStack extends Stack {
     });
 
     const balanceDB = new Table(this, 'BalanceTable', {
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
@@ -28,9 +31,11 @@ class BankAccountServiceStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    const transactionsQueue = new Queue(this, 'BalanceUpdateQueue', {
-      visibilityTimeout: Duration.seconds(300)
-    });
+    /*const transactionsQueue = new Queue(this, 'BalanceUpdateQueue', {
+      visibilityTimeout: Duration.seconds(100)
+    });*/
+
+
 
     const transactionCreate = new Function(this, 'CreateTransaction', {
       runtime: Runtime.NODEJS_14_X,
@@ -38,21 +43,54 @@ class BankAccountServiceStack extends Stack {
       code: Code.fromAsset('lambda'),
     });
 
+
+    /*********** */
+    const queue = new Queue(this, 'QueueTransaction', {
+      visibilityTimeout: Duration.seconds(30),      
+      receiveMessageWaitTime: Duration.seconds(20), 
+    });
+
+    const sendToQueue = new Function(this, 'SendToQueue', {
+      // Lambda function configurations
+      runtime: Runtime.NODEJS_14_X,
+      handler: 'transactionCreate.handler',
+      code: Code.fromAsset('lambda'),
+    });
+    
+   
+
+    transactionCreate.addEventSource(new DynamoEventSource(transactionDB, {
+      startingPosition: 0,
+      batchSize: 100,
+      //bisectBatchOnError: true,
+      //onFailure: new SqsDlq(queue),
+      retryAttempts: 10,
+    }));
+
+    // Grant necessary permissions to the Lambda function
+    transactionDB.grantReadData(sendToQueue);
+    queue.grantSendMessages(sendToQueue);
+
+    // Set up DynamoDB as the trigger for the Lambda function
+    sendToQueue.addEventSource('MyTransaction', {
+      eventSourceArn: transactionDB.tableStreamArn
+    });
+
+/************* */
+
     const balanceUpdater = new Function(this, 'BalanceUpdaterFunction', {
       runtime: Runtime.NODEJS_14_X,
       handler: 'balanceUpdater.handler',
       code: Code.fromAsset('lambda'),
-      events: [new SqsEventSource(transactionsQueue)],
+      events: [new SqsEventSource(sendToQueue)],
     });
-
-    /*transactionProcessor.addEnvironment('TRANSACTIONS_TABLE_NAME', transactionsTable.tableName);
-    transactionProcessor.addEnvironment('BALANCE_UPDATE_QUEUE_URL', transactionsQueue.queueUrl);
-    balanceUpdater.addEnvironment('BALANCE_TABLE_NAME', balanceTable.tableName);*/
 
     transactionDB.grantReadWriteData(transactionCreate);
     balanceDB.grantReadWriteData(balanceUpdater);
-    transactionsQueue.grantSendMessages(transactionCreate);
-    transactionsQueue.grantConsumeMessages(balanceUpdater);
+    
+    /*transactionsQueue.grantSendMessages(transactionCreate);
+    transactionsQueue.grantConsumeMessages(balanceUpdater);*/
+    
 
     const balanceGetter = new Function(this, 'BalanceGetterFunction', {
       runtime: Runtime.NODEJS_14_X,
@@ -70,7 +108,6 @@ class BankAccountServiceStack extends Stack {
     //balanceGetter.addEnvironment('BALANCE_TABLE_NAME', balanceTable.tableName);
 
     balanceDB.grantReadData(balanceGetter);
-
 
   } 
 }

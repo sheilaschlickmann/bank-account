@@ -57,7 +57,7 @@
   "BalanceUpdateQueueF6832429": {
    "Type": "AWS::SQS::Queue",
    "Properties": {
-    "VisibilityTimeout": 300
+    "VisibilityTimeout": 100
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
@@ -165,7 +165,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-     "S3Key": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip"
+     "S3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
     },
     "Role": {
      "Fn::GetAtt": [
@@ -182,7 +182,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BankAccountServiceStack/CreateTransaction/Resource",
-    "aws:asset:path": "asset.d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc",
+    "aws:asset:path": "asset.61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -289,7 +289,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-     "S3Key": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip"
+     "S3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
     },
     "Role": {
      "Fn::GetAtt": [
@@ -306,7 +306,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BankAccountServiceStack/BalanceUpdaterFunction/Resource",
-    "aws:asset:path": "asset.d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc",
+    "aws:asset:path": "asset.61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -410,7 +410,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-     "S3Key": "d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc.zip"
+     "S3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
     },
     "Role": {
      "Fn::GetAtt": [
@@ -427,7 +427,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BankAccountServiceStack/BalanceGetterFunction/Resource",
-    "aws:asset:path": "asset.d22ffa61090fdb73f127b746d8420c4d0464603e6640c3f6eaf0aa7a447653cc",
+    "aws:asset:path": "asset.61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

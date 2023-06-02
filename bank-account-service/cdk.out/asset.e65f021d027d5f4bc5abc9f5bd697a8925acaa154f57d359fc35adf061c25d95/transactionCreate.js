@@ -2,7 +2,6 @@
 const { DynamoDB } = require('aws-sdk');
 const crypto = require('crypto');
 const AWS = require('aws-sdk');
-const SQS = new AWS.SQS();
 
 
   /*for (let record of event.Records) {
@@ -28,33 +27,15 @@ const SQS = new AWS.SQS();
               Item: transaction,
           }).promise();
 
-          /*onst sqs = new AWS.SQS();
+          const sqs = new AWS.SQS();
           const params = {
               // URL da sua fila do SQS
-              QueueUrl: 'https://sqs.us-east-1.amazonaws.com/132949636437/BankAccountServiceStack-BalanceUpdateQueueF6832429-OYeDxxGAkX8D', // substitua pela URL da sua fila SQS, 
+              QueueUrl: process.env.QUEUE_URL,//'https://sqs.us-east-1.amazonaws.com/132949636437/BankAccountServiceStack-BalanceUpdateQueueF6832429-OYeDxxGAkX8D', // substitua pela URL da sua fila SQS, 
               MessageBody: JSON.stringify(transaction)
         };
 
         // Enviando a transação para a fila do SQS
-        await sqs.sendMessage(params).promise();*/
-
-          event.Records.forEach((record) => {
-          const data = record.dynamodb.NewImage;
-      
-          // Send data to SQS queue
-          const params = {
-            MessageBody: JSON.stringify(data),
-            QueueUrl: process.env.SQS_QUEUE_URL,
-          };
-      
-          SQS.sendMessage(params, (err) => {
-            if (err) {
-              console.error('Failed to send message to SQS:', err);
-            } else {
-              console.log('Message sent to SQS successfully.');
-            }
-          });
-        });
+        await sqs.sendMessage(params).promise();
 
           return {
               statusCode: 201,
