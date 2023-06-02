@@ -34,6 +34,9 @@
                       "readCapacityUnits": 5,
                       "writeCapacityUnits": 5
                     },
+                    "streamSpecification": {
+                      "streamViewType": "NEW_AND_OLD_IMAGES"
+                    },
                     "tableName": "Transaction"
                   }
                 },
@@ -82,6 +85,9 @@
                       "readCapacityUnits": 5,
                       "writeCapacityUnits": 5
                     },
+                    "streamSpecification": {
+                      "streamViewType": "NEW_AND_OLD_IMAGES"
+                    },
                     "tableName": "Balance"
                   }
                 },
@@ -101,30 +107,6 @@
             },
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_dynamodb.Table",
-              "version": "2.81.0"
-            }
-          },
-          "BalanceUpdateQueue": {
-            "id": "BalanceUpdateQueue",
-            "path": "BankAccountServiceStack/BalanceUpdateQueue",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "BankAccountServiceStack/BalanceUpdateQueue/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::SQS::Queue",
-                  "aws:cdk:cloudformation:props": {
-                    "visibilityTimeout": 100
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_sqs.CfnQueue",
-                  "version": "2.81.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_sqs.Queue",
               "version": "2.81.0"
             }
           },
@@ -222,20 +204,6 @@
                                       "Ref": "AWS::NoValue"
                                     }
                                   ]
-                                },
-                                {
-                                  "Action": [
-                                    "sqs:GetQueueAttributes",
-                                    "sqs:GetQueueUrl",
-                                    "sqs:SendMessage"
-                                  ],
-                                  "Effect": "Allow",
-                                  "Resource": {
-                                    "Fn::GetAtt": [
-                                      "BalanceUpdateQueueF6832429",
-                                      "Arn"
-                                    ]
-                                  }
                                 }
                               ],
                               "Version": "2012-10-17"
@@ -299,7 +267,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-                      "s3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
+                      "s3Key": "57325636a2b17212f38a45c4b001395858332819685279ff45859a8d3b2e0616.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [
@@ -322,17 +290,41 @@
               "version": "2.81.0"
             }
           },
-          "BalanceUpdaterFunction": {
-            "id": "BalanceUpdaterFunction",
-            "path": "BankAccountServiceStack/BalanceUpdaterFunction",
+          "QueueTransaction": {
+            "id": "QueueTransaction",
+            "path": "BankAccountServiceStack/QueueTransaction",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "BankAccountServiceStack/QueueTransaction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SQS::Queue",
+                  "aws:cdk:cloudformation:props": {
+                    "visibilityTimeout": 30
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sqs.CfnQueue",
+                  "version": "2.81.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sqs.Queue",
+              "version": "2.81.0"
+            }
+          },
+          "sendToQueue": {
+            "id": "sendToQueue",
+            "path": "BankAccountServiceStack/sendToQueue",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole",
+                "path": "BankAccountServiceStack/sendToQueue/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole/ImportServiceRole",
+                    "path": "BankAccountServiceStack/sendToQueue/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.81.0"
@@ -340,7 +332,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole/Resource",
+                    "path": "BankAccountServiceStack/sendToQueue/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -379,67 +371,56 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole/DefaultPolicy",
+                    "path": "BankAccountServiceStack/sendToQueue/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole/DefaultPolicy/Resource",
+                        "path": "BankAccountServiceStack/sendToQueue/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
                             "policyDocument": {
                               "Statement": [
                                 {
+                                  "Action": "dynamodb:ListStreams",
+                                  "Effect": "Allow",
+                                  "Resource": "*"
+                                },
+                                {
                                   "Action": [
-                                    "sqs:ChangeMessageVisibility",
-                                    "sqs:DeleteMessage",
-                                    "sqs:GetQueueAttributes",
-                                    "sqs:GetQueueUrl",
-                                    "sqs:ReceiveMessage"
+                                    "dynamodb:DescribeStream",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator"
                                   ],
                                   "Effect": "Allow",
                                   "Resource": {
                                     "Fn::GetAtt": [
-                                      "BalanceUpdateQueueF6832429",
-                                      "Arn"
+                                      "TransactionsTable0A011FCB",
+                                      "StreamArn"
                                     ]
                                   }
                                 },
                                 {
                                   "Action": [
-                                    "dynamodb:BatchGetItem",
-                                    "dynamodb:BatchWriteItem",
-                                    "dynamodb:ConditionCheckItem",
-                                    "dynamodb:DeleteItem",
-                                    "dynamodb:DescribeTable",
-                                    "dynamodb:GetItem",
-                                    "dynamodb:GetRecords",
-                                    "dynamodb:GetShardIterator",
-                                    "dynamodb:PutItem",
-                                    "dynamodb:Query",
-                                    "dynamodb:Scan",
-                                    "dynamodb:UpdateItem"
+                                    "sqs:GetQueueAttributes",
+                                    "sqs:GetQueueUrl",
+                                    "sqs:SendMessage"
                                   ],
                                   "Effect": "Allow",
-                                  "Resource": [
-                                    {
-                                      "Fn::GetAtt": [
-                                        "BalanceTableF6713123",
-                                        "Arn"
-                                      ]
-                                    },
-                                    {
-                                      "Ref": "AWS::NoValue"
-                                    }
-                                  ]
+                                  "Resource": {
+                                    "Fn::GetAtt": [
+                                      "QueueTransaction52828BBE",
+                                      "Arn"
+                                    ]
+                                  }
                                 }
                               ],
                               "Version": "2012-10-17"
                             },
-                            "policyName": "BalanceUpdaterFunctionServiceRoleDefaultPolicy8B73D199",
+                            "policyName": "sendToQueueServiceRoleDefaultPolicy222DB6BD",
                             "roles": [
                               {
-                                "Ref": "BalanceUpdaterFunctionServiceRoleA7924E71"
+                                "Ref": "sendToQueueServiceRole680B9888"
                               }
                             ]
                           }
@@ -463,11 +444,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "BankAccountServiceStack/BalanceUpdaterFunction/Code",
+                "path": "BankAccountServiceStack/sendToQueue/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "BankAccountServiceStack/BalanceUpdaterFunction/Code/Stage",
+                    "path": "BankAccountServiceStack/sendToQueue/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.81.0"
@@ -475,7 +456,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "BankAccountServiceStack/BalanceUpdaterFunction/Code/AssetBucket",
+                    "path": "BankAccountServiceStack/sendToQueue/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.81.0"
@@ -489,21 +470,29 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "BankAccountServiceStack/BalanceUpdaterFunction/Resource",
+                "path": "BankAccountServiceStack/sendToQueue/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-                      "s3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
+                      "s3Key": "57325636a2b17212f38a45c4b001395858332819685279ff45859a8d3b2e0616.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [
-                        "BalanceUpdaterFunctionServiceRoleA7924E71",
+                        "sendToQueueServiceRole680B9888",
                         "Arn"
                       ]
                     },
-                    "handler": "balanceUpdater.handler",
+                    "environment": {
+                      "variables": {
+                        "QUEUE_URL": {
+                          "Ref": "QueueTransaction52828BBE"
+                        }
+                      }
+                    },
+                    "functionName": "event-to-dynamodb",
+                    "handler": "transactionQueue.handler",
                     "runtime": "nodejs14.x"
                   }
                 },
@@ -512,25 +501,27 @@
                   "version": "2.81.0"
                 }
               },
-              "SqsEventSource:BankAccountServiceStackBalanceUpdateQueueB75FC184": {
-                "id": "SqsEventSource:BankAccountServiceStackBalanceUpdateQueueB75FC184",
-                "path": "BankAccountServiceStack/BalanceUpdaterFunction/SqsEventSource:BankAccountServiceStackBalanceUpdateQueueB75FC184",
+              "DynamoDBEventSource:BankAccountServiceStackTransactionsTable6EF8D658": {
+                "id": "DynamoDBEventSource:BankAccountServiceStackTransactionsTable6EF8D658",
+                "path": "BankAccountServiceStack/sendToQueue/DynamoDBEventSource:BankAccountServiceStackTransactionsTable6EF8D658",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "BankAccountServiceStack/BalanceUpdaterFunction/SqsEventSource:BankAccountServiceStackBalanceUpdateQueueB75FC184/Resource",
+                    "path": "BankAccountServiceStack/sendToQueue/DynamoDBEventSource:BankAccountServiceStackTransactionsTable6EF8D658/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::EventSourceMapping",
                       "aws:cdk:cloudformation:props": {
                         "functionName": {
-                          "Ref": "BalanceUpdaterFunctionC775D7A0"
+                          "Ref": "sendToQueue329AECE0"
                         },
+                        "batchSize": 100,
                         "eventSourceArn": {
                           "Fn::GetAtt": [
-                            "BalanceUpdateQueueF6832429",
-                            "Arn"
+                            "TransactionsTable0A011FCB",
+                            "StreamArn"
                           ]
-                        }
+                        },
+                        "startingPosition": "LATEST"
                       }
                     },
                     "constructInfo": {
@@ -541,182 +532,6 @@
                 },
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.aws_lambda.EventSourceMapping",
-                  "version": "2.81.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_lambda.Function",
-              "version": "2.81.0"
-            }
-          },
-          "BalanceGetterFunction": {
-            "id": "BalanceGetterFunction",
-            "path": "BankAccountServiceStack/BalanceGetterFunction",
-            "children": {
-              "ServiceRole": {
-                "id": "ServiceRole",
-                "path": "BankAccountServiceStack/BalanceGetterFunction/ServiceRole",
-                "children": {
-                  "ImportServiceRole": {
-                    "id": "ImportServiceRole",
-                    "path": "BankAccountServiceStack/BalanceGetterFunction/ServiceRole/ImportServiceRole",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.81.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "BankAccountServiceStack/BalanceGetterFunction/ServiceRole/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                      "aws:cdk:cloudformation:props": {
-                        "assumeRolePolicyDocument": {
-                          "Statement": [
-                            {
-                              "Action": "sts:AssumeRole",
-                              "Effect": "Allow",
-                              "Principal": {
-                                "Service": "lambda.amazonaws.com"
-                              }
-                            }
-                          ],
-                          "Version": "2012-10-17"
-                        },
-                        "managedPolicyArns": [
-                          {
-                            "Fn::Join": [
-                              "",
-                              [
-                                "arn:",
-                                {
-                                  "Ref": "AWS::Partition"
-                                },
-                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                              ]
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                      "version": "2.81.0"
-                    }
-                  },
-                  "DefaultPolicy": {
-                    "id": "DefaultPolicy",
-                    "path": "BankAccountServiceStack/BalanceGetterFunction/ServiceRole/DefaultPolicy",
-                    "children": {
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "BankAccountServiceStack/BalanceGetterFunction/ServiceRole/DefaultPolicy/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
-                          "aws:cdk:cloudformation:props": {
-                            "policyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": [
-                                    "dynamodb:BatchGetItem",
-                                    "dynamodb:ConditionCheckItem",
-                                    "dynamodb:DescribeTable",
-                                    "dynamodb:GetItem",
-                                    "dynamodb:GetRecords",
-                                    "dynamodb:GetShardIterator",
-                                    "dynamodb:Query",
-                                    "dynamodb:Scan"
-                                  ],
-                                  "Effect": "Allow",
-                                  "Resource": [
-                                    {
-                                      "Fn::GetAtt": [
-                                        "BalanceTableF6713123",
-                                        "Arn"
-                                      ]
-                                    },
-                                    {
-                                      "Ref": "AWS::NoValue"
-                                    }
-                                  ]
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            },
-                            "policyName": "BalanceGetterFunctionServiceRoleDefaultPolicy4B0E0A63",
-                            "roles": [
-                              {
-                                "Ref": "BalanceGetterFunctionServiceRoleF0C66274"
-                              }
-                            ]
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
-                          "version": "2.81.0"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.Policy",
-                      "version": "2.81.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_iam.Role",
-                  "version": "2.81.0"
-                }
-              },
-              "Code": {
-                "id": "Code",
-                "path": "BankAccountServiceStack/BalanceGetterFunction/Code",
-                "children": {
-                  "Stage": {
-                    "id": "Stage",
-                    "path": "BankAccountServiceStack/BalanceGetterFunction/Code/Stage",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.AssetStaging",
-                      "version": "2.81.0"
-                    }
-                  },
-                  "AssetBucket": {
-                    "id": "AssetBucket",
-                    "path": "BankAccountServiceStack/BalanceGetterFunction/Code/AssetBucket",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                      "version": "2.81.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                  "version": "2.81.0"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "BankAccountServiceStack/BalanceGetterFunction/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
-                  "aws:cdk:cloudformation:props": {
-                    "code": {
-                      "s3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-                      "s3Key": "61dbb3f7a9a4a0934f4f652b61bd9d9842b569f924e89d5f4a5c630a346d91ac.zip"
-                    },
-                    "role": {
-                      "Fn::GetAtt": [
-                        "BalanceGetterFunctionServiceRoleF0C66274",
-                        "Arn"
-                      ]
-                    },
-                    "handler": "balanceGetter.handler",
-                    "runtime": "nodejs14.x"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
                   "version": "2.81.0"
                 }
               }

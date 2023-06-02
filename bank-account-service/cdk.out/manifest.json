@@ -17,7 +17,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::132949636437:role/cdk-hnb659fds-deploy-role-132949636437-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::132949636437:role/cdk-hnb659fds-cfn-exec-role-132949636437-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-132949636437-us-east-1/1ad62d8c4b557d7d3a0f370f9a7ccf0f199f825d826aeacda693839ade676d13.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-132949636437-us-east-1/9d24eb687197520383ba12b634045cdb61aa7bb370ab35b3954fade84dc7eaac.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -61,12 +61,6 @@
             "data": "BalanceTableF6713123"
           }
         ],
-        "/BankAccountServiceStack/BalanceUpdateQueue/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "BalanceUpdateQueueF6832429"
-          }
-        ],
         "/BankAccountServiceStack/CreateTransaction/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -85,46 +79,34 @@
             "data": "CreateTransaction110CC09A"
           }
         ],
-        "/BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole/Resource": [
+        "/BankAccountServiceStack/QueueTransaction/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "BalanceUpdaterFunctionServiceRoleA7924E71"
+            "data": "QueueTransaction52828BBE"
           }
         ],
-        "/BankAccountServiceStack/BalanceUpdaterFunction/ServiceRole/DefaultPolicy/Resource": [
+        "/BankAccountServiceStack/sendToQueue/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "BalanceUpdaterFunctionServiceRoleDefaultPolicy8B73D199"
+            "data": "sendToQueueServiceRole680B9888"
           }
         ],
-        "/BankAccountServiceStack/BalanceUpdaterFunction/Resource": [
+        "/BankAccountServiceStack/sendToQueue/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "BalanceUpdaterFunctionC775D7A0"
+            "data": "sendToQueueServiceRoleDefaultPolicy222DB6BD"
           }
         ],
-        "/BankAccountServiceStack/BalanceUpdaterFunction/SqsEventSource:BankAccountServiceStackBalanceUpdateQueueB75FC184/Resource": [
+        "/BankAccountServiceStack/sendToQueue/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "BalanceUpdaterFunctionSqsEventSourceBankAccountServiceStackBalanceUpdateQueueB75FC18474F7A2BB"
+            "data": "sendToQueue329AECE0"
           }
         ],
-        "/BankAccountServiceStack/BalanceGetterFunction/ServiceRole/Resource": [
+        "/BankAccountServiceStack/sendToQueue/DynamoDBEventSource:BankAccountServiceStackTransactionsTable6EF8D658/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "BalanceGetterFunctionServiceRoleF0C66274"
-          }
-        ],
-        "/BankAccountServiceStack/BalanceGetterFunction/ServiceRole/DefaultPolicy/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "BalanceGetterFunctionServiceRoleDefaultPolicy4B0E0A63"
-          }
-        ],
-        "/BankAccountServiceStack/BalanceGetterFunction/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "BalanceGetterFunction205A8270"
+            "data": "sendToQueueDynamoDBEventSourceBankAccountServiceStackTransactionsTable6EF8D658182FE331"
           }
         ],
         "/BankAccountServiceStack/BankAccountAPI/Resource": [

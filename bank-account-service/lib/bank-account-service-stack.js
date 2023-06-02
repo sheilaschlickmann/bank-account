@@ -1,8 +1,8 @@
 const { Stack, RemovalPolicy, Duration } = require('aws-cdk-lib');
 const {Table, AttributeType, StreamViewType } = require("aws-cdk-lib/aws-dynamodb");
 const {Queue} = require("aws-cdk-lib/aws-sqs");
-const { Function, Runtime, Code } = require('aws-cdk-lib/aws-lambda');
-const { SqsEventSource, DynamoEventSource} = require("aws-cdk-lib/aws-lambda-event-sources");
+const { Function, Runtime, Code, StartingPosition} = require('aws-cdk-lib/aws-lambda');
+const { SqsEventSource, DynamoEventSource } = require("aws-cdk-lib/aws-lambda-event-sources");
 const { RestApi, LambdaIntegration  } = require('aws-cdk-lib/aws-apigateway');
 
 
@@ -12,7 +12,7 @@ class BankAccountServiceStack extends Stack {
     super(scope, id, props);
         
     const transactionDB = new Table(this, 'TransactionsTable', {
-      stream: StreamViewType.NEW_IMAGE,
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
@@ -31,12 +31,6 @@ class BankAccountServiceStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    /*const transactionsQueue = new Queue(this, 'BalanceUpdateQueue', {
-      visibilityTimeout: Duration.seconds(100)
-    });*/
-
-
-
     const transactionCreate = new Function(this, 'CreateTransaction', {
       runtime: Runtime.NODEJS_14_X,
       handler: 'transactionCreate.handler',
@@ -47,56 +41,51 @@ class BankAccountServiceStack extends Stack {
     /*********** */
     const queue = new Queue(this, 'QueueTransaction', {
       visibilityTimeout: Duration.seconds(30),      
-      receiveMessageWaitTime: Duration.seconds(20), 
     });
 
-    const sendToQueue = new Function(this, 'SendToQueue', {
-      // Lambda function configurations
-      runtime: Runtime.NODEJS_14_X,
-      handler: 'transactionCreate.handler',
+    const sendToQueue = new Function(this, 'sendToQueue', {
       code: Code.fromAsset('lambda'),
+      handler: 'transactionQueue.handler',
+      runtime: Runtime.NODEJS_14_X,
+      functionName: 'event-to-dynamodb',
+      environment: {
+        QUEUE_URL: queue.queueUrl,
+      }
     });
-    
-   
 
-    transactionCreate.addEventSource(new DynamoEventSource(transactionDB, {
-      startingPosition: 0,
-      batchSize: 100,
-      //bisectBatchOnError: true,
-      //onFailure: new SqsDlq(queue),
-      retryAttempts: 10,
+    // Add lambda source
+    sendToQueue.addEventSource(new DynamoEventSource(transactionDB, {
+      startingPosition: StartingPosition.LATEST,
     }));
 
-    // Grant necessary permissions to the Lambda function
-    transactionDB.grantReadData(sendToQueue);
-    queue.grantSendMessages(sendToQueue);
-
-    // Set up DynamoDB as the trigger for the Lambda function
-    sendToQueue.addEventSource('MyTransaction', {
-      eventSourceArn: transactionDB.tableStreamArn
-    });
-
+    //transactionDB.grantWriteData(sendToQueue);
+/*
 /************* */
 
-    const balanceUpdater = new Function(this, 'BalanceUpdaterFunction', {
+    /*const balanceUpdater = new Function(this, 'BalanceUpdaterFunction', {
       runtime: Runtime.NODEJS_14_X,
       handler: 'balanceUpdater.handler',
       code: Code.fromAsset('lambda'),
       events: [new SqsEventSource(sendToQueue)],
-    });
+    });*/
+
+    /*balanceUpdater.addEventSource(new SqsEventSource(queue, {
+      startingPosition: StartingPosition.LATEST,
+      batchSize: 5,
+    }));*/
 
     transactionDB.grantReadWriteData(transactionCreate);
-    balanceDB.grantReadWriteData(balanceUpdater);
+    //balanceDB.grantReadWriteData(balanceUpdater);
     
-    /*transactionsQueue.grantSendMessages(transactionCreate);
-    transactionsQueue.grantConsumeMessages(balanceUpdater);*/
+    queue.grantSendMessages(sendToQueue);
+    //transactionsQueue.grantConsumeMessages(balanceUpdater);
     
 
-    const balanceGetter = new Function(this, 'BalanceGetterFunction', {
+    /*const balanceGetter = new Function(this, 'BalanceGetterFunction', {
       runtime: Runtime.NODEJS_14_X,
       handler: 'balanceGetter.handler',
       code: Code.fromAsset('lambda'),
-    });
+    });*/
 
     const api = new RestApi(this, 'BankAccountAPI', {
       restApiName: 'BankAccountAPI',
@@ -107,7 +96,7 @@ class BankAccountServiceStack extends Stack {
 
     //balanceGetter.addEnvironment('BALANCE_TABLE_NAME', balanceTable.tableName);
 
-    balanceDB.grantReadData(balanceGetter);
+    //balanceDB.grantReadData(balanceGetter);
 
   } 
 }
