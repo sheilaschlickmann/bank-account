@@ -1,41 +1,44 @@
-//const sqs = new AWS.SQS();
 const { DynamoDB } = require('aws-sdk');
 const crypto = require('crypto');
 const AWS = require('aws-sdk');
-const SQS = new AWS.SQS();
 
+exports.handler = async function(event) {
+    const transaction = {
+        id: crypto.randomUUID(),
+        ...JSON.parse(event.body)
+    }
 
-  /*for (let record of event.Records) {
-    // assumindo que o registro contém os detalhes da transação
-    const transaction = JSON.parse(record.body);
+    if (transaction.type !== 'DEBIT' && transaction.type !== 'CREDIT') {
+        return { 
+          statusCode: 400, 
+          body: `Invalid transaction type. Must be either 'DEBIT' or 'CREDIT'.`
+        };
+    }
 
-    // armazene a transação no DynamoDB
-    await dynamodb.put({
-      TableName: 'TransactionsTable',
-      Item: transaction
-    }).promise();*/
+    if (transaction.value <= 0) {
+        return { 
+          statusCode: 400, 
+          body: `Value cannot be greater than or equal to zero.`
+        };
+    }
 
-    exports.handler = async function(event, context) {
-      const transaction = {
-          id: crypto.randomUUID(),
-          ...JSON.parse(event.body)
-      }
-      try {
-          console.log("Adding a new transaction: ", transaction);
-          const docClient = new DynamoDB.DocumentClient();
-          await docClient.put({
-              TableName: 'Transaction',
-              Item: transaction,
-          }).promise();
+    try {
+        const docClient = new DynamoDB.DocumentClient();
+        await docClient.put({
+            TableName: 'Transaction',
+            Item: transaction,
+        }).promise();
 
-          return {
-              statusCode: 201,
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(transaction),
-          };
-      } catch (err) {
-          console.log('DynamoDB error: ', err);
-          return { statusCode: 500, body: 'Failed to add transaction' };
-      }
-
+        return {
+            statusCode: 201,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(transaction),
+        };
+    } catch (error) {
+        console.error(`Error creating transaction: ${error}`);
+        return { 
+        statusCode: 500, 
+        body: `Failed to add transaction`
+    };
+    }
   };

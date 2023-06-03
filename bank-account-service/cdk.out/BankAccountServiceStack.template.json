@@ -146,7 +146,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-     "S3Key": "57325636a2b17212f38a45c4b001395858332819685279ff45859a8d3b2e0616.zip"
+     "S3Key": "86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d.zip"
     },
     "Role": {
      "Fn::GetAtt": [
@@ -163,7 +163,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BankAccountServiceStack/CreateTransaction/Resource",
-    "aws:asset:path": "asset.57325636a2b17212f38a45c4b001395858332819685279ff45859a8d3b2e0616",
+    "aws:asset:path": "asset.86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -239,6 +239,30 @@
       },
       {
        "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TransactionsTable0A011FCB",
+          "Arn"
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      },
+      {
+       "Action": [
         "sqs:GetQueueAttributes",
         "sqs:GetQueueUrl",
         "sqs:SendMessage"
@@ -270,7 +294,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
-     "S3Key": "57325636a2b17212f38a45c4b001395858332819685279ff45859a8d3b2e0616.zip"
+     "S3Key": "86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d.zip"
     },
     "Role": {
      "Fn::GetAtt": [
@@ -295,7 +319,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "BankAccountServiceStack/sendToQueue/Resource",
-    "aws:asset:path": "asset.57325636a2b17212f38a45c4b001395858332819685279ff45859a8d3b2e0616",
+    "aws:asset:path": "asset.86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -319,6 +343,258 @@
     "aws:cdk:path": "BankAccountServiceStack/sendToQueue/DynamoDBEventSource:BankAccountServiceStackTransactionsTable6EF8D658/Resource"
    }
   },
+  "BalanceUpdateServiceRoleE80E1327": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BalanceUpdate/ServiceRole/Resource"
+   }
+  },
+  "BalanceUpdateServiceRoleDefaultPolicy02C4C352": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "sqs:ChangeMessageVisibility",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:ReceiveMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "QueueTransaction52828BBE",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "BalanceTableF6713123",
+          "Arn"
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BalanceUpdateServiceRoleDefaultPolicy02C4C352",
+    "Roles": [
+     {
+      "Ref": "BalanceUpdateServiceRoleE80E1327"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BalanceUpdate/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "BalanceUpdate7128BB35": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
+     "S3Key": "86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "BalanceUpdateServiceRoleE80E1327",
+      "Arn"
+     ]
+    },
+    "Environment": {
+     "Variables": {
+      "QUEUE_URL": {
+       "Ref": "QueueTransaction52828BBE"
+      }
+     }
+    },
+    "Handler": "balanceUpdate.handler",
+    "Runtime": "nodejs14.x"
+   },
+   "DependsOn": [
+    "BalanceUpdateServiceRoleDefaultPolicy02C4C352",
+    "BalanceUpdateServiceRoleE80E1327"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BalanceUpdate/Resource",
+    "aws:asset:path": "asset.86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "BalanceUpdateSqsEventSourceBankAccountServiceStackQueueTransactionD2C19298A9D16082": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "FunctionName": {
+     "Ref": "BalanceUpdate7128BB35"
+    },
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "QueueTransaction52828BBE",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BalanceUpdate/SqsEventSource:BankAccountServiceStackQueueTransactionD2C19298/Resource"
+   }
+  },
+  "GetBalanceServiceRole462471AB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/GetBalance/ServiceRole/Resource"
+   }
+  },
+  "GetBalanceServiceRoleDefaultPolicy15FADC5A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "BalanceTableF6713123",
+          "Arn"
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "GetBalanceServiceRoleDefaultPolicy15FADC5A",
+    "Roles": [
+     {
+      "Ref": "GetBalanceServiceRole462471AB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/GetBalance/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "GetBalanceF3D06A93": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-132949636437-us-east-1",
+     "S3Key": "86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "GetBalanceServiceRole462471AB",
+      "Arn"
+     ]
+    },
+    "Handler": "balanceGetter.handler",
+    "Runtime": "nodejs14.x"
+   },
+   "DependsOn": [
+    "GetBalanceServiceRoleDefaultPolicy15FADC5A",
+    "GetBalanceServiceRole462471AB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/GetBalance/Resource",
+    "aws:asset:path": "asset.86e41b44769fa973d59e8800de5da91c3d123b89b24963aa9eb18b4136ef860d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
   "BankAccountAPI5C6B92F0": {
    "Type": "AWS::ApiGateway::RestApi",
    "Properties": {
@@ -328,7 +604,7 @@
     "aws:cdk:path": "BankAccountServiceStack/BankAccountAPI/Resource"
    }
   },
-  "BankAccountAPIDeployment6504617De8bd034bbab0f3573c120d9c5c67938c": {
+  "BankAccountAPIDeployment6504617Da5cb28d122d3fa3291a504877512f5fc": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "RestApiId": {
@@ -337,6 +613,8 @@
     "Description": "Automatically created by the RestApi construct"
    },
    "DependsOn": [
+    "BankAccountAPIbalanceGET411F1C1E",
+    "BankAccountAPIbalance3158E61B",
     "BankAccountAPItransactionPOSTF1AD6AB3",
     "BankAccountAPItransaction17F6891E"
    ],
@@ -351,7 +629,7 @@
      "Ref": "BankAccountAPI5C6B92F0"
     },
     "DeploymentId": {
-     "Ref": "BankAccountAPIDeployment6504617De8bd034bbab0f3573c120d9c5c67938c"
+     "Ref": "BankAccountAPIDeployment6504617Da5cb28d122d3fa3291a504877512f5fc"
     },
     "StageName": "prod"
    },
@@ -470,6 +748,119 @@
    },
    "Metadata": {
     "aws:cdk:path": "BankAccountServiceStack/BankAccountAPI/Default/transaction/POST/Resource"
+   }
+  },
+  "BankAccountAPIbalance3158E61B": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "BankAccountAPI5C6B92F0",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "balance",
+    "RestApiId": {
+     "Ref": "BankAccountAPI5C6B92F0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BankAccountAPI/Default/balance/Resource"
+   }
+  },
+  "BankAccountAPIbalanceGETApiPermissionBankAccountServiceStackBankAccountAPI9ABEC0E1GETbalance3AC139AF": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetBalanceF3D06A93",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:132949636437:",
+       {
+        "Ref": "BankAccountAPI5C6B92F0"
+       },
+       "/",
+       {
+        "Ref": "BankAccountAPIDeploymentStageprod2E89F204"
+       },
+       "/GET/balance"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BankAccountAPI/Default/balance/GET/ApiPermission.BankAccountServiceStackBankAccountAPI9ABEC0E1.GET..balance"
+   }
+  },
+  "BankAccountAPIbalanceGETApiPermissionTestBankAccountServiceStackBankAccountAPI9ABEC0E1GETbalance9BD49FCB": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "GetBalanceF3D06A93",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:132949636437:",
+       {
+        "Ref": "BankAccountAPI5C6B92F0"
+       },
+       "/test-invoke-stage/GET/balance"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BankAccountAPI/Default/balance/GET/ApiPermission.Test.BankAccountServiceStackBankAccountAPI9ABEC0E1.GET..balance"
+   }
+  },
+  "BankAccountAPIbalanceGET411F1C1E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "HttpMethod": "GET",
+    "ResourceId": {
+     "Ref": "BankAccountAPIbalance3158E61B"
+    },
+    "RestApiId": {
+     "Ref": "BankAccountAPI5C6B92F0"
+    },
+    "AuthorizationType": "NONE",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "GetBalanceF3D06A93",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BankAccountServiceStack/BankAccountAPI/Default/balance/GET/Resource"
    }
   },
   "CDKMetadata": {

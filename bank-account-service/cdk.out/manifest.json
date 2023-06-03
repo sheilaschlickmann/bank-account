@@ -17,7 +17,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::132949636437:role/cdk-hnb659fds-deploy-role-132949636437-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::132949636437:role/cdk-hnb659fds-cfn-exec-role-132949636437-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-132949636437-us-east-1/9d24eb687197520383ba12b634045cdb61aa7bb370ab35b3954fade84dc7eaac.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-132949636437-us-east-1/9f5ac3f6251e0dbea24d24c527558de73f0eda99bc8abe504a56b016bf15a5e4.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -109,6 +109,48 @@
             "data": "sendToQueueDynamoDBEventSourceBankAccountServiceStackTransactionsTable6EF8D658182FE331"
           }
         ],
+        "/BankAccountServiceStack/BalanceUpdate/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BalanceUpdateServiceRoleE80E1327"
+          }
+        ],
+        "/BankAccountServiceStack/BalanceUpdate/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BalanceUpdateServiceRoleDefaultPolicy02C4C352"
+          }
+        ],
+        "/BankAccountServiceStack/BalanceUpdate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BalanceUpdate7128BB35"
+          }
+        ],
+        "/BankAccountServiceStack/BalanceUpdate/SqsEventSource:BankAccountServiceStackQueueTransactionD2C19298/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BalanceUpdateSqsEventSourceBankAccountServiceStackQueueTransactionD2C19298A9D16082"
+          }
+        ],
+        "/BankAccountServiceStack/GetBalance/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetBalanceServiceRole462471AB"
+          }
+        ],
+        "/BankAccountServiceStack/GetBalance/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetBalanceServiceRoleDefaultPolicy15FADC5A"
+          }
+        ],
+        "/BankAccountServiceStack/GetBalance/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetBalanceF3D06A93"
+          }
+        ],
         "/BankAccountServiceStack/BankAccountAPI/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -118,7 +160,7 @@
         "/BankAccountServiceStack/BankAccountAPI/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "BankAccountAPIDeployment6504617De8bd034bbab0f3573c120d9c5c67938c"
+            "data": "BankAccountAPIDeployment6504617Da5cb28d122d3fa3291a504877512f5fc"
           }
         ],
         "/BankAccountServiceStack/BankAccountAPI/DeploymentStage.prod/Resource": [
@@ -155,6 +197,30 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "BankAccountAPItransactionPOSTF1AD6AB3"
+          }
+        ],
+        "/BankAccountServiceStack/BankAccountAPI/Default/balance/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BankAccountAPIbalance3158E61B"
+          }
+        ],
+        "/BankAccountServiceStack/BankAccountAPI/Default/balance/GET/ApiPermission.BankAccountServiceStackBankAccountAPI9ABEC0E1.GET..balance": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BankAccountAPIbalanceGETApiPermissionBankAccountServiceStackBankAccountAPI9ABEC0E1GETbalance3AC139AF"
+          }
+        ],
+        "/BankAccountServiceStack/BankAccountAPI/Default/balance/GET/ApiPermission.Test.BankAccountServiceStackBankAccountAPI9ABEC0E1.GET..balance": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BankAccountAPIbalanceGETApiPermissionTestBankAccountServiceStackBankAccountAPI9ABEC0E1GETbalance9BD49FCB"
+          }
+        ],
+        "/BankAccountServiceStack/BankAccountAPI/Default/balance/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BankAccountAPIbalanceGET411F1C1E"
           }
         ],
         "/BankAccountServiceStack/CDKMetadata/Default": [
